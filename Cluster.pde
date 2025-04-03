@@ -33,9 +33,6 @@ class Cluster {
     xLocation = calculateXposition(this.xLocation, this.xSpeed);
     yLocation = calculateYposition(this.yLocation, this.ySpeed);
     
-    //Calculate the shape scale speed
-    calculateScaling();
-    
     //Check wall collision
     xSpeed = checkspeed(this.xLocation, this.xSpeed, this.shapeSize);
     

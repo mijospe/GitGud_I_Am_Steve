@@ -6,9 +6,6 @@ import ddf.minim.*;
 //The delay in between spawning a cluser (In Miliseconds)
 private int delay = 2000;
 
-//Max Cluster Count to Spawn in Level
-private int maxClusterCount = 10;
-
 //How much mass does the player need to gain after eating a cluster
 private int massIncreaser = 5;
 
@@ -43,6 +40,7 @@ private Player playerReference;
 
 void setup()
 {
+  // Change Window Size and Text Size
   size(1920, 1080);
   rectMode(CENTER);
   textSize(128);
@@ -58,79 +56,73 @@ void setup()
   eat = soundFunctionality.loadSample("Eat.mp3");
   steve = soundFunctionality.loadSample("I_Am_Steve.mp3");
   minecraftMusic = soundFunctionality.loadSample("Minecraft.mp3");
-  
   // Play Background Music
   minecraftMusic.trigger();
   
-  // Spawn 3 clusters at the start of the game
-  for(int i=0; i <= 3; i++){
-     clusters.add(new Cluster(i));
-     clusterCount++;
-  }
-  
-  // Spawn Player into the game and set its reference
+  // Spawn Player into the game and save it
   playerReference = new Player();
 }
 
-// Run every frame
+//-----------------------//
+//    Run every frame    //
+//-----------------------//
 void draw()
 {
-  minecraftMusic.setGain(10000);
+  // Change the volume every frame
+  minecraftMusic.setGain(4000);
   
-  // If the game has not finished
-  if (clusters.size() > 1)
+  // Draw background
+  image(backgroundImage, 0, 0);
+  
+  // Update the player every frame
+  playerReference.update();
+  
+  // If time has passed since previous spawn, spawn a new one
+  if (millis() - previousMiliSecond >= delay)
   {
-    // Redraw background
-    image(backgroundImage, 0, 0);
-    
-    // Update the player every frame
-    playerReference.update();
-    
-    // If time has passed since previous spawn, spawn a new one
-    if (millis() - previousMiliSecond >= delay && clusterCount <= maxClusterCount)
-    {
-      previousMiliSecond = millis();
-      clusters.add(new Cluster(0));
-      clusterCount++;
-    }
-    
-    // Go trough every single cluster in the list of clusters
-    for(int i = 0; i < clusters.size() - 1; i++) 
-    {
-      Cluster currentCluster = clusters.get(i);
-      // Update Cluster
-      currentCluster.update();
-      // Check Bottom Collision for Cluster
-      float clusterXLocation = currentCluster.checkbottomcollision(currentCluster.yLocation);
-      float playerX = playerReference.xLocation;
-      // If the cluster is currently hitting the bottom of the screen
-      if (clusterXLocation != 0)
-      {
-        if (clusterXLocation > playerX - playerReference.playerImageWidth*0.5 && clusterXLocation < playerX + playerReference.playerImageWidth * 0.5)
-        {
-           score++;
-           playerReference.mass += massIncreaser;
-           playerReference.playerImageWidth += massIncreaser;
-           eat.setGain(-10);
-           eat.trigger();
-        }
-        
-        // Stop rendering this cluster
-        clusters.remove(i);
-        i--;
-      }
-    }
-    
-    text(score, 25, 100);
-    
-    println(clusters.size());
+    previousMiliSecond = millis();
+    clusters.add(new Cluster(0));
+    clusterCount++;
   }
+  
+  // Go trough every single cluster in the list of clusters
+  for(int i = 0; i < clusters.size() - 1; i++) 
+  {
+    // Set the current looping Cluster
+    Cluster currentCluster = clusters.get(i);
+    // Update Cluster
+    currentCluster.update();
+    // Check Bottom Collision for Cluster
+    float clusterXLocation = currentCluster.checkbottomcollision(currentCluster.yLocation);
+    float playerX = playerReference.xLocation;
+    // If the cluster is currently hitting the bottom of the screen
+    log(clusterXLocation);
+    if (clusterXLocation != 0)
+    {
+      if (clusterXLocation > playerX - playerReference.playerImageWidth*0.5 && clusterXLocation < playerX + playerReference.playerImageWidth * 0.5)
+      {
+         score++;
+         playerReference.mass += massIncreaser;
+         playerReference.playerImageWidth += massIncreaser;
+         eat.setGain(-10);
+         eat.trigger();
+      }
+      
+      // Stop rendering this cluster
+      clusters.remove(i);
+      i--;
+    }
+  }
+  
+  text(score, 25, 100);
+  
+  println(clusters.size());
+}
   
   // Game Over
-  else if(clusters.size() <= 1 && clusterCount > 0)
-  {
-    clusterCount = 0;
-    steve.trigger();
-    image(gameOverImage, 0, 0);
-  }
-}
+  //else if(clusters.size() <= 1 && clusterCount > 0)
+  //{
+  //  clusterCount = 0;
+  //  steve.trigger();
+  //  image(gameOverImage, 0, 0);
+  //}
